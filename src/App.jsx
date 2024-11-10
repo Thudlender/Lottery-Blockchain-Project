@@ -29,7 +29,7 @@ function App() {
     try {
       const web3 = getWeb3();
       const accounts = await web3.eth.requestAccounts();
-      if (accounts[0] === addressInput) {
+      if (accounts[0].toLowerCase() === addressInput.toLowerCase()) {
         setAccount(accounts[0]);
         alert("Logged in successfully!");
       } else {
