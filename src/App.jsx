@@ -6,6 +6,7 @@ function App() {
   const [ticketNumber, setTicketNumber] = useState(0);
   const [randomNumber, setRandomNumber] = useState(null);
   const [account, setAccount] = useState(null);
+  const [addressInput, setAddressInput] = useState(""); // New state for address input
   const [prizeAmount, setPrizeAmount] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -16,8 +17,6 @@ function App() {
         const accounts = await web3.eth.getAccounts();
         if (accounts.length > 0) {
           setAccount(accounts[0]);
-        } else {
-          alert("Please connect your wallet");
         }
       } catch (err) {
         console.error(err);
@@ -25,6 +24,22 @@ function App() {
     };
     checkConnection();
   }, []);
+
+  const handleLogin = async () => {
+    try {
+      const web3 = getWeb3();
+      const accounts = await web3.eth.requestAccounts();
+      if (accounts[0] === addressInput) {
+        setAccount(accounts[0]);
+        alert("Logged in successfully!");
+      } else {
+        alert("The connected wallet does not match the entered address.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error logging in. Please check your wallet connection.");
+    }
+  };
 
   const handleBuyTicket = async () => {
     if (ticketNumber < 0 || ticketNumber > 99) {
@@ -38,7 +53,7 @@ function App() {
       const contract = getContract(web3);
       const tx = await contract.methods.buyTicket(ticketNumber).send({
         from: account,
-        value: web3.utils.toWei("0.001", "ether"), // ราคา 0.001 ETH
+        value: web3.utils.toWei("0.001", "ether"), // Ticket price 0.001 ETH
       });
       await tx;
       alert("Ticket purchased successfully!");
@@ -112,7 +127,22 @@ function App() {
           </button>
         </>
       ) : (
-        <p className="text-white">Please connect your wallet</p>
+        <div>
+          <input
+            type="text"
+            value={addressInput}
+            onChange={(e) => setAddressInput(e.target.value)}
+            placeholder="Enter your address"
+            className="input input-bordered input-info w-full max-w-xs mb-4"
+          />
+          <button
+            onClick={handleLogin}
+            className="btn btn-primary mb-4"
+          >
+            Connect Wallet
+          </button>
+          <p className="text-white">Please connect your wallet</p>
+        </div>
       )}
     </div>
   );

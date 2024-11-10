@@ -1,11 +1,49 @@
 import Web3 from "web3";
 
-const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // ใส่ที่อยู่ของ contract ที่คุณ deploy
+const contractAddress = "0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B"; // Replace with your deployed contract address
 const contractABI = [
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "winner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "prizeAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "LotteryDrawn",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "ticketNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "TicketPurchased",
+		"type": "event"
 	},
 	{
 		"inputs": [
@@ -156,6 +194,7 @@ const contractABI = [
 	}
 ];
 
+// Initialize Web3 instance
 export const getWeb3 = () => {
   if (window.ethereum) {
     const web3 = new Web3(window.ethereum);
@@ -164,7 +203,23 @@ export const getWeb3 = () => {
   throw new Error("Ethereum provider not found");
 };
 
+// Get contract instance
 export const getContract = (web3) => {
-  const contract = new web3.eth.Contract(contractABI, contractAddress);
-  return contract;
+  return new web3.eth.Contract(contractABI, contractAddress);
+};
+
+// Login function to request wallet connection and return account
+export const login = async () => {
+  try {
+    const web3 = getWeb3();
+    const accounts = await web3.eth.requestAccounts();
+    if (accounts.length > 0) {
+      return accounts[0]; // Return the first connected account
+    } else {
+      throw new Error("No accounts found. Please connect your wallet.");
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+    throw error;
+  }
 };
